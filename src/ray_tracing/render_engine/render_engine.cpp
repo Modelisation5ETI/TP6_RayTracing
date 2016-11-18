@@ -48,6 +48,8 @@ void render(image& im,scene_parameter const& scene)
     int const Nx = im.Nx();
     int const Ny = im.Ny();
 
+    anti_aliasing_table(5,1.0,0.8);
+
     // loop over all the pixels of the image
     for(int kx=0 ; kx<Nx ; ++kx)
     {
@@ -56,9 +58,25 @@ void render(image& im,scene_parameter const& scene)
         {
             float const v = static_cast<float>(ky)/(Ny-1);
 
-            // generate ray and compute color
-            ray const r = ray_generator(cam,u,v);
-            color const c = ray_trace(r,scene);
+            int const N_sample = 5;
+            anti_aliasing_table aa(N_sample); //
+            color c ;
+
+            //init value = 0
+            for(int dx=0 ; dx<N_sample ; ++dx)
+            {
+                for(int dy=0 ; dy<N_sample ; ++dy)
+                {
+                    float const du = aa.displacement(dx)/(Nx-1); //Nx is the size in pixel in x direction
+                    float const dv = aa.displacement(dy)/(Ny-1); //Ny is the size in pixel in y direction
+                    float const w = aa.weight(dx,dy);
+
+                    // generate ray and compute color
+
+                    ray const r = ray_generator(cam,u + du,v + dv);
+                    c = c + w * ray_trace(r,scene,3);
+                }
+            }
             im({kx,ky}) = c;
         }
     }
@@ -80,7 +98,7 @@ ray ray_generator(camera const& cam,float const u,float const v)
     return r;
 }
 
-color ray_trace(ray const& r,scene_parameter const& scene)
+color ray_trace(ray const& r,scene_parameter const& scene, int nb_reflection)
 {
     // ********************************************* //
     // ********************************************* //
@@ -92,18 +110,30 @@ color ray_trace(ray const& r,scene_parameter const& scene)
     //Le code suivant affecte la couleur de base de la premiere intersection trouvee
     //Ce code ne gere pas les reflections.
 
-
     intersection_data intersection; //current intersection
     int intersected_primitive = 0;  //current index of intersected primitive
 
     bool const is_intersection = compute_intersection(r,scene,intersection,intersected_primitive);
     if(is_intersection) //if the ray intersects a primitive
     {
+
         material const& mat = scene.get_material(intersected_primitive);
-        return compute_illumination(mat,intersection,scene);
+        color colorReflection =  compute_illumination(mat,intersection,scene);
+        ray ray_reflected = ray (intersection.position + 0.0001 * intersection.normal , reflected(-r.u(), intersection.normal));
+
+        if(nb_reflection > 0)
+        {
+
+           // colorReflection += mat.reflection()  * ray_trace(ray_reflected,scene,nb_reflection-1); // attenuation material
+           colorReflection += 0.2  * ray_trace(ray_reflected,scene,nb_reflection-1);  //attenuation 0.2
+        }
+        return colorReflection;
     }
     else
+    {
         return color(0,0,0); //no intersection
+    }
+
 }
 
 
@@ -220,7 +250,7 @@ color compute_illumination(material const& mat,intersection_data const& intersec
         else
           {
           color c_shading = compute_shading( mat.shading(), mat.color_object(), p0, L.p, intersection.normal, scene.get_camera().center() );
-          c += L.power * L.c * c_shading;
+          c += L.power * L.c * c_shading / ( norm(p0- L.p) * norm(p0- L.p) );
           }
     }
 

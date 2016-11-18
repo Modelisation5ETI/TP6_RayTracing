@@ -33,7 +33,7 @@ struct shading_parameter
     shading_parameter(float ambiant_param=0.1f,
                       float diffuse_param=0.6f,
                       float specular_param=0.4f,
-                      float specular_exponent=2.0f);
+                      float specular_exponent=128.0f);
 
 
     /** ambiant component */
