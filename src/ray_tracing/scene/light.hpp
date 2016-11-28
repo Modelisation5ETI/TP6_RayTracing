@@ -34,7 +34,7 @@ struct light
     /** Direct constructor */
     light(vec3 const& position_param=vec3(),
           color const& color_param=color(1.0f,1.0f,1.0f),
-          float power_param=1.0f);
+          float power_param=500.0f); // shadow on ground
 
     /** Light position */
     vec3 p;

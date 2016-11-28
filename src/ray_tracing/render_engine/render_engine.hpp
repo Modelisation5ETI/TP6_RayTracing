@@ -36,7 +36,7 @@ class vec3;
 void render(image& im,scene_parameter const& scene);
 
 /** Compute the final color associated to given ray within the scene */
-color ray_trace(ray const& r,scene_parameter const& scene);
+color ray_trace(ray const& r,scene_parameter const& scene, int nb_reflection);
 
 /** Compute the first intersection encountered between a ray and a primitive of the scene */
 bool compute_intersection(ray const& r,
