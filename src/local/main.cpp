@@ -30,7 +30,7 @@ int main(int argc,char *argv[])
     try
     {
         //create empty black image
-        int const N_pixels = 500;
+        int const N_pixels = 250;
         image im(N_pixels);
         im.fill({0,0,0});
 

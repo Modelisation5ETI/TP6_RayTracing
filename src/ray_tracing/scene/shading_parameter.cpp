@@ -49,8 +49,6 @@ color compute_shading(shading_parameter const& shading,
 {
 
     // ********************************************* //
-    //  [TO DO] Calcul d'illumination pour un sommet 3D + normal + couleur original
-    //
     // ALGORITHME:
     //
     // c0 <- couleur initiale
@@ -87,7 +85,6 @@ color compute_shading(shading_parameter const& shading,
 
     color c = ( k_ambiant + k_diffuse ) * input + k_specular*sourceColor;
     return c;
-
 }
 
 

@@ -42,67 +42,56 @@ float sphere::radius() const
 
 bool sphere::intersect(ray const& ray_param,intersection_data& intersection) const
 {
+  // Ray direction
+  vec3 const& u = ray_param.u();
+  // Ray Position
+  vec3 const& xs = ray_param.p0();
 
-    vec3 const& u = ray_param.u();
+  // Primitive's center
+  vec3 const& x0 = center_data;
 
-    // ********************************************************** //
-    // ********************************************************** //
-    //  TO DO:
-    //    Calcul d'intersection entre un rayon et une plan
-    //
-    // Variales:
-    //  - Position initiale du rayon: ray_param.p0()
-    //  - Vecteur directeur unitaire du rayon: u
-    //  - Position du centre de la sphere: center_data
-    //  - Rayon de la sphere: radius_data
-    //
-    // Aide de syntaxe:
-    //  - Norme au carre d'un vecteur v: float norme=v.norm2();
-    //             ou: float norme=v.dot(v);
-    //
-    // ********************************************************** //
-    // ********************************************************** //
+  // Equation solution
+  float t_inter;
 
-    vec3 const& xs = ray_param.p0();
-    vec3 const& x0 = center_data;
+  // 2nd order system solving
+  float a = dot( u,u );
+  float b = 2 * dot( xs - x0, u );
+  float c = dot( xs - x0, xs - x0 ) - radius_data * radius_data;
 
-    float t_inter;
+  float Delta = b * b - 4.0f * a * c;
 
-    //Résolution système 2nd ordre en t_inter
-    float a = dot( u,u );
-    float b = 2 * dot( xs - x0, u );
-    float c = dot( xs - x0, xs - x0 ) - radius_data * radius_data;
-
-    float Delta = b * b - 4.0f * a * c;
-    if( Delta < 0.0 )
-      return false;
-
-    if( Delta > 0.0 )
-      {
-      float const t_inter1 = ( -b - sqrt(Delta) )/( 2.0f*a );
-      float const t_inter2 = ( -b + sqrt(Delta) )/( 2.0f*a );
-      if(t_inter1 < 0.0 && t_inter2 < 0.0 )
-         return false;
-      if( t_inter1 < 0.0 || t_inter2 < 0.0 )
-        t_inter = std::max( t_inter1, t_inter2 );
-      else
-        t_inter = std::min( t_inter1, t_inter2 );
-      vec3 const p_inter = xs + t_inter * u;
-      vec3 const n_inter = normalized( p_inter - x0 );
-      intersection.set( p_inter, n_inter, t_inter );
-      return true;
-      }
-
-    if( Delta < 1e-8 || Delta > 1e-8)
-      {
-      t_inter = -b/(2.0f*a);
-      vec3 const p_inter = xs + t_inter * u;
-      vec3 const n_inter = normalized( p_inter - x0 );
-      intersection.set( p_inter, n_inter, t_inter );
-      return true;
-      }
-
+  // No solution
+  if( Delta < 0.0 )
     return false;
+
+  // Two solutions. Return closest
+  if( Delta > 0.0 )
+    {
+    float const t_inter1 = ( -b - sqrt(Delta) )/( 2.0f*a );
+    float const t_inter2 = ( -b + sqrt(Delta) )/( 2.0f*a );
+    if(t_inter1 < 0.0 && t_inter2 < 0.0 )
+       return false;
+    if( t_inter1 < 0.0 || t_inter2 < 0.0 )
+      t_inter = std::max( t_inter1, t_inter2 );
+    else
+      t_inter = std::min( t_inter1, t_inter2 );
+    vec3 const p_inter = xs + t_inter * u;
+    vec3 const n_inter = normalized( p_inter - x0 );
+    intersection.set( p_inter, n_inter, t_inter );
+    return true;
+    }
+
+  // Delta = 0; One solution
+  if( Delta < 1e-8 || Delta > 1e-8)
+    {
+    t_inter = -b/(2.0f*a);
+    vec3 const p_inter = xs + t_inter * u;
+    vec3 const n_inter = normalized( p_inter - x0 );
+    intersection.set( p_inter, n_inter, t_inter );
+    return true;
+    }
+
+  return false;
 }
 
 

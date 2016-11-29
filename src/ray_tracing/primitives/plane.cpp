@@ -43,44 +43,30 @@ vec3 const& plane::normal() const
 bool plane::intersect(ray const& ray_param,intersection_data& intersection) const
 {
 
-    vec3 const& u = ray_param.u();
-    vec3 const& n = normal_data;
+  // Ray direction
+  vec3 const& u = ray_param.u();
+  // Ray position
+  vec3 const xs = ray_param.p0();
 
-    // ********************************************************** //
-    // ********************************************************** //
-    //  TO DO:
-    //    Calcul d'intersection entre un rayon et un plan
-    //
-    // Variables:
-    //  - Position initiale du rayon: ray_param.p0()
-    //  - Vecteur directeur unitaire du rayon: u
-    //  - Position d'un point du plan: position_data
-    //  - Normale unitaire au plan: n
-    //
-    // Aide de syntaxe:
-    //  - Calcul du produit scalaire <a,b>: dot(a,b);
-    //  - Mise a jour de la donnee d'intersection:
-    //                intersection.set(p_inter,n_inter,t_inter);
-    //
-    // ********************************************************** //
-    // ********************************************************** //
+  // Plan's normal
+  vec3 const& n = normal_data;
 
-    vec3 const xs = ray_param.p0();
-    vec3 const xp = position_data;
-    float const t_inter = -dot( xs - xp, n ) / dot( u, n );
-    vec3 const p_inter = xs + t_inter * u;
-    vec3 const n_inter = n;
+  // Point belonging to the plan
+  vec3 const xp = position_data;
 
+  // Solution
+  float const t_inter = -dot( xs - xp, n ) / dot( u, n );
+  vec3 const p_inter = xs + t_inter * u;
+  vec3 const n_inter = n;
 
-    if( t_inter > 0 )
-      {
-      intersection.set(p_inter,n_inter,t_inter);
-      return true;
-      }
-    else
-      return false;
-
-
+  // Intersection
+  if( t_inter > 0 )
+    {
+    intersection.set(p_inter,n_inter,t_inter);
+    return true;
+    }
+  else
+    return false;
 }
 
 }
